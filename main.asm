@@ -22,20 +22,10 @@ _start:
 
 	call sgenrand
 
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
-	call genrand
+	infinite:
+		call genrand
+	jmp infinite
+	
 
 	mov rax, 60
 	mov rdi, 0
