@@ -22,19 +22,20 @@ _start:
 
 	call sgenrand
 
-	mov rbx, 103
-
-	call genrand	
-	xor rdx,rdx
-	div rbx
-
 	call genrand
-	xor rdx,rdx
-	div rbx
-
 	call genrand
-	xor rdx,rdx
-	div rbx
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
+	call genrand
 
 	mov rax, 60
 	mov rdi, 0
