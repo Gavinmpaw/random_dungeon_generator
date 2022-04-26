@@ -47,7 +47,8 @@ sgenrand:
 
 		; mt + mti
 		mov rdi, mt
-		add rdi, rcx
+		lea rdx, [rcx*8]
+		add rdi, rdx
 		
 		; (69069 * mt[mti - 1])   same as mt + (mti - 1) dereferenced
 		mov rax, QWORD [rdi - 8]
