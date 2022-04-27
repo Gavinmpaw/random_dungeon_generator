@@ -18,7 +18,14 @@ _start:
 
 	call sgenrand
 
-	call create_node	
+;	call create_node	
+
+	call genrand
+
+	and rax, 1
+
+	int3
+
 
 	mov rax, 60
 	mov rdi, 0

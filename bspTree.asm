@@ -40,7 +40,7 @@ create_node:
 	pop rbp
 	ret
 
-; BSP_NODE* create_node_with_values(int x, int y, int h, int w);
+; BSP_NODE* create_node_with_values(int x, int y, int w, int h);
 ; same as above, but sets the node up with initial values
 create_node_with_values:
 	push rbp
@@ -52,8 +52,37 @@ create_node_with_values:
 
 	mov DWORD [rax + BSP_NODE_X_OFF], edi
 	mov DWORD [rax + BSP_NODE_Y_OFF], esi
-	mov DWORD [rax + BSP_NODE_H_OFF], edx
-	mov DWORD [rax + BSP_NODE_W_OFF], ecx
+	mov DWORD [rax + BSP_NODE_H_OFF], ecx
+	mov DWORD [rax + BSP_NODE_W_OFF], edx
+
+	mov rsp, rbp
+	pop rbp
+	ret
+
+; void split_node_random(BSP_NODE* node);
+; splits the region contained in a node at a random offset and creates child nodes containing the two sub-regions
+split_node_random:
+	push rbp
+	mov rbp, rsp
+
+		push rdi
+		call genrand
+
+		and rax, 0x1
+		cmp rax, 1
+		jne split_node_random_X_split
+			; split on Y (height)
+			call genrand
+			pop rdi
+		
+			; thinking I want only the middle 50% to be valid
+			; so, 0+(height/4) and height-(height/4) are the bounds, then use the random number from above to pick something in that range	
+
+		split_node_random_X_split:
+			; split on X (width)
+			call genrand
+			pop rdi
+
 
 	mov rsp, rbp
 	pop rbp
