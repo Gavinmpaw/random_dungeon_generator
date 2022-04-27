@@ -1,4 +1,4 @@
-main: main.asm random_generator.asm
+main: main.asm random_generator.asm alloc.asm bspTree.asm
 	@nasm -f elf64 main.asm
 	@ld main.o -o main
 	@rm main.o

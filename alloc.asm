@@ -52,6 +52,7 @@ basically_calloc:
 
 	mov rsp, rbp
 	pop rbp
+	ret
 
 ; (pointer, oldsize, newsize)
 basically_realloc:
@@ -102,3 +103,4 @@ basically_free:
 
 	mov rsp,rbp
 	pop rbp
+	ret
