@@ -16,6 +16,8 @@ section .data
 
 section .text
 
+; BSP_NODE* create_node();
+; creates a new bsp node... probably not going to be called from outside of this file very often
 create_node:
 	push rbp
 	mov rbp, rsp
@@ -38,4 +40,21 @@ create_node:
 	pop rbp
 	ret
 
+; BSP_NODE* create_node_with_values(int x, int y, int h, int w);
+; same as above, but sets the node up with initial values
+create_node_with_values:
+	push rbp
+	mov rbp, rsp
+	
+	push rdi
+	call create_node
+	pop rdi
 
+	mov DWORD [rax + BSP_NODE_X_OFF], edi
+	mov DWORD [rax + BSP_NODE_Y_OFF], esi
+	mov DWORD [rax + BSP_NODE_H_OFF], edx
+	mov DWORD [rax + BSP_NODE_W_OFF], ecx
+
+	mov rsp, rbp
+	pop rbp
+	ret
