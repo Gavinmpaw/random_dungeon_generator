@@ -22,13 +22,14 @@ _start:
 	xor rsi,rsi
 	mov rdx,500
 	mov rcx,500
-	call create_node_with_values
+	call BSP_create_node_with_values
 
 	int3
 
 
 	mov rdi, rax
-	call split_node_random
+	mov rsi, 50
+	call BSP_split_to_area
 	
 	int3
 

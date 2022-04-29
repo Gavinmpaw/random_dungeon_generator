@@ -18,7 +18,7 @@ section .text
 
 ; BSP_NODE* create_node();
 ; creates a new bsp node... probably not going to be called from outside of this file very often
-create_node:
+BSP_create_node:
 	push rbp
 	mov rbp, rsp
 
@@ -42,7 +42,7 @@ create_node:
 
 ; BSP_NODE* create_node_with_values(int x, int y, int w, int h);
 ; same as above, but sets the node up with initial values
-create_node_with_values:
+BSP_create_node_with_values:
 	push rbp
 	mov rbp, rsp
 	
@@ -50,7 +50,7 @@ create_node_with_values:
 	push rcx
 	push rsi
 	push rdx
-	call create_node
+	call BSP_create_node
 	pop rdx
 	pop rsi
 	pop rcx
@@ -67,16 +67,22 @@ create_node_with_values:
 
 ; void split_node_random(BSP_NODE* node);
 ; splits the region contained in a node at a random offset and creates child nodes containing the two sub-regions
-split_node_random:
+BSP_split_node_random:
 	push rbp
 	mov rbp, rsp
+
+		; refuse to split if height or width are less than 10
+		cmp DWORD [rdi + BSP_NODE_H_OFF], 10
+		jle	BSP_split_node_split_over
+		cmp DWORD [rdi + BSP_NODE_W_OFF], 10
+		jle BSP_split_node_split_over
 
 		push rdi
 		call genrand
 
 		and rax, 0x1
 		cmp rax, 1
-		jne split_node_random_X_split
+		jne BSP_split_node_random_X_split
 			; split on Y (height)
 			call genrand
 			pop rdi
@@ -112,7 +118,7 @@ split_node_random:
 			mov esi, DWORD [rdi + BSP_NODE_Y_OFF]	; original Y value	
 			mov edx, DWORD [rdi + BSP_NODE_W_OFF]	; original width
 			mov edi, DWORD [rdi + BSP_NODE_X_OFF]	; original X
-			call create_node_with_values
+			call BSP_create_node_with_values
 			pop rdi
 			mov QWORD [rdi + BSP_NODE_LCHILD_OFF], rax
 
@@ -126,13 +132,13 @@ split_node_random:
 			sub rax, rcx	
 			mov rcx, rax							; original height minus rcx
 			mov edi, DWORD [rdi + BSP_NODE_X_OFF] 	; original X
-			call create_node_with_values
+			call BSP_create_node_with_values
 			pop rdi
 			mov QWORD [rdi + BSP_NODE_RCHILD_OFF], rax
 			
-			jmp split_over
+			jmp BSP_split_node_split_over
 
-		split_node_random_X_split:
+		BSP_split_node_random_X_split:
 			; split on X (width)
 			call genrand
 			pop rdi
@@ -169,7 +175,7 @@ split_node_random:
 			mov edx, ecx							; rcx (ecx) as width
 			mov ecx, DWORD [rdi + BSP_NODE_H_OFF]	; original height
 			mov edi, DWORD [rdi + BSP_NODE_X_OFF]	; original X
-			call create_node_with_values
+			call BSP_create_node_with_values
 			pop rdi
 			mov QWORD [rdi + BSP_NODE_LCHILD_OFF], rax
 
@@ -183,12 +189,58 @@ split_node_random:
 			mov edi, DWORD [rdi + BSP_NODE_X_OFF] 
 			add edi, ecx							; original X + ecx
 			mov ecx, eax							; original height moved to proper register
-			call create_node_with_values
+			call BSP_create_node_with_values
 			pop rdi
 			mov QWORD [rdi + BSP_NODE_RCHILD_OFF], rax
 
-	split_over:
-
+	BSP_split_node_split_over:
 	mov rsp, rbp
+	pop rbp
+	ret
+
+; void split_to_area(BSP_NODE* root, int targetArea) 
+BSP_split_to_area:
+	push rbp
+	mov rbp, rsp
+		
+		cmp rdi, 0
+		je BSP_split_to_area_size_reached_base_case ; shouldnt ever trigger... but doesnt hurt to be careful	
+
+		xor eax,eax
+		xor ebx,ebx
+		mov eax, DWORD [rdi + BSP_NODE_W_OFF]
+		mov ebx, DWORD [rdi + BSP_NODE_H_OFF]
+		sub eax, DWORD [rdi + BSP_NODE_X_OFF]
+		sub ebx, DWORD [rdi + BSP_NODE_Y_OFF]
+		; rax and rbx should now contain the width and height of the node	
+		imul rbx
+		; rax should now contain the area of the node (ignoring rdx because I doubt the output was too big for rax)
+
+		cmp rax, rsi		
+		jle BSP_split_to_area_size_reached_base_case	; assuming the area is less than or equal to the target... splitting wont take it any closer, so we hit the end
+
+
+		push rdi
+		push rsi
+		call BSP_split_node_random	; split itself
+		pop rsi
+		pop rdi
+
+		push rdi
+		push rsi
+
+		; recursively call on Left Child
+		mov rdi, [rdi + BSP_NODE_LCHILD_OFF]
+		call BSP_split_to_area
+		
+		pop rsi
+		pop rdi
+
+		; recursively call on Right Child
+		mov rdi, [rdi + BSP_NODE_RCHILD_OFF]
+		call BSP_split_to_area
+	
+	BSP_split_to_area_size_reached_base_case:
+	mov rsp,rbp
 	pop rbp
 	ret
