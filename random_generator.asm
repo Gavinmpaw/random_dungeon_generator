@@ -107,7 +107,7 @@ genrand:
 		mov DWORD [rbp - 28], 0
 		jmp genrand_for1_compare
 		genrand_for1_top:
-			
+	
 			; y = (mt[kk]&upper_mask) | (mt[kk+1]&lower_mask)
 			mov   rax, mt
 			movsx rcx, DWORD [rbp-28]	
@@ -135,9 +135,9 @@ genrand:
 
 			shr rax, 1
 			xor rax, rbx	; rax = (y >> 1) ^ mag01[y & 0x1]
-			
+
 			mov   rbx, mt
-			movsx rcx, DWORD [rbx - 28]
+			movsx rcx, DWORD [rbp - 28]	; I was being dumb and this value was rbx - 28 instead of rbp - 28... a wonder it didnt blow up sooner
 			add rcx, M
 			lea rcx, [rcx*8]
 			add rbx, rcx
@@ -146,7 +146,7 @@ genrand:
 			xor rax, rbx	; rax = mt[kk+m] ^ (y >> 1) ^ mag01[y & 0x1];
 			
 			mov rbx, mt
-			movsx rcx, DWORD [rbx - 28]
+			movsx rcx, DWORD [rbp - 28]
 			lea rcx, [rcx * 8]
 			add rbx, rcx
 			mov QWORD [rbx], rax ; mt[kk] = rax
@@ -193,7 +193,7 @@ genrand:
 			xor rax, rbx	; rax = (y >> 1) ^ mag01[y & 0x1]
 			
 			mov   rbx, mt
-			movsx rcx, DWORD [rbx - 28]
+			movsx rcx, DWORD [rbp - 28]
 			add rcx, M-N
 			lea rcx, [rcx*8]
 			add rbx, rcx
@@ -202,7 +202,7 @@ genrand:
 			xor rax, rbx	; rax = mt[kk+m] ^ (y >> 1) ^ mag01[y & 0x1];
 			
 			mov rbx, mt
-			movsx rcx, DWORD [rbx - 28]
+			movsx rcx, DWORD [rbp - 28]
 			lea rcx, [rcx * 8]
 			add rbx, rcx
 			mov QWORD [rbx], rax ; mt[kk] = rax

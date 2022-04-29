@@ -1,6 +1,8 @@
 ; requires alloc.asm and random_generator.asm to be imported as well
+; pretty printing functionality requires some form of printf to be imported	
 
 section .data
+	BSP_pretty_print_str db "BSP_NODE{ x:%d, y:%d, w:%d, h:%d }",10,0
 	; node
 	; 2 x 8 byte pointers
 	; 4 x 4 byte integers (2 for x and y location, 2 for height and width)
@@ -241,6 +243,42 @@ BSP_split_to_area:
 		call BSP_split_to_area
 	
 	BSP_split_to_area_size_reached_base_case:
+	mov rsp,rbp
+	pop rbp
+	ret
+
+; void print_leaf_nodes(BSP_NODE* root)
+BSP_print_leaf_nodes:
+	push rbp
+	mov rbp,rsp
+
+		cmp rdi, 0
+		je BSP_print_leaf_nodes_exit
+
+		mov eax, DWORD [rdi + BSP_NODE_LCHILD_OFF]
+		cmp eax, 0
+		jne BSP_print_leaf_nodes_not_leaf
+			xor rsi,rsi
+			xor rdx,rdx
+			xor rcx,rcx
+			xor r8, r8
+
+			mov esi, DWORD [rdi + BSP_NODE_X_OFF]
+			mov edx, DWORD [rdi + BSP_NODE_Y_OFF]
+			mov ecx, DWORD [rdi + BSP_NODE_W_OFF]
+			mov r8d, DWORD [rdi + BSP_NODE_H_OFF]
+			mov rdi, BSP_pretty_print_str
+			call printf		
+
+		jmp BSP_print_leaf_nodes_exit
+		BSP_print_leaf_nodes_not_leaf:
+			push rdi
+			mov rdi, [rdi + BSP_NODE_LCHILD_OFF]
+			call BSP_print_leaf_nodes
+			pop rdi
+			mov rdi, [rdi + BSP_NODE_RCHILD_OFF]
+			call BSP_print_leaf_nodes
+	BSP_print_leaf_nodes_exit:
 	mov rsp,rbp
 	pop rbp
 	ret
