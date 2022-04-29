@@ -31,19 +31,28 @@ _start:
 	push rdi
 	call BSP_split_to_area
 	pop rdi
-
-	push rdi	
-	call BSP_print_leaf_nodes
-
-	pop rdi
+	
 	push rdi
-	call BSP_count_leaf_nodes
-	mov r15, rax
+	call BSP_print_leaf_nodes
+	
+	call print_nl
 
 	pop rdi
 	call BSP_flatten_leaf_nodes
+	mov r15, rax
+	mov r14, rdx
+
+	xor rcx,rcx
+	print_lp:
+		push rcx
+			mov rdi, QWORD [r15 + rcx*8]
+			call BSP_print_leaf_nodes
+		pop rcx
+	inc rcx
+	cmp rcx, r14
+	jle print_lp
 	
-	int3
+	
 
 	mov rax, 60
 	mov rdi, 0
