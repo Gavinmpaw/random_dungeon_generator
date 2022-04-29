@@ -47,7 +47,7 @@ WRITER_write_64bitReg:
 	pop rbp
 	ret	
 
-; void* dissolve_writer(WRITER* writer, size in bytes)
+; void* dissolve_writer(WRITER* writer)
 WRITER_dissolve_writer:
 	push rbp
 	mov rbp, rsp
@@ -55,7 +55,8 @@ WRITER_dissolve_writer:
 		mov rax, QWORD [rdi + WRITER_BASE_ADDR_OFF]
 		push rax
 			
-		; rdi and rsi end up being correct by calling convention
+		; rdi should already be the writer
+		mov rsi, WRITER_SIZE
 		call basically_free
 		
 		pop rax
