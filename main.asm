@@ -18,14 +18,19 @@ _start:
 
 	call sgenrand
 
-;	call create_node	
-
-	call genrand
-
-	and rax, 1
+	xor rdi,rdi
+	xor rsi,rsi
+	mov rdx,500
+	mov rcx,500
+	call create_node_with_values
 
 	int3
 
+
+	mov rdi, rax
+	call split_node_random
+	
+	int3
 
 	mov rax, 60
 	mov rdi, 0
