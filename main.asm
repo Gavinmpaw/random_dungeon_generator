@@ -36,8 +36,13 @@ _start:
 	call BSP_print_leaf_nodes
 
 	pop rdi
-	call BSP_count_leaf_nodes	
+	push rdi
+	call BSP_count_leaf_nodes
+	mov r15, rax
 
+	pop rdi
+	call BSP_flatten_leaf_nodes
+	
 	int3
 
 	mov rax, 60

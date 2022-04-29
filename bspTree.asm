@@ -349,8 +349,30 @@ BSP_flatten_leaf_nodes:
 BSP_write_leaf_nodes:
 	push rbp
 	mov rbp,rsp
-		;TODO write this recursive function	
-	
+		cmp rdi, 0
+		je BSP_write_leaf_nodes_exit
+
+		mov eax, DWORD [rdi + BSP_NODE_LCHILD_OFF]
+		cmp eax, 0
+		jne BSP_write_leaf_nodes_not_leaf
+			push rdi
+			push rsi
+			xchg rdi,rsi	; writer function expects them to be perfectly reversed (Writer first as opposed to node first)
+			call WRITER_write_64bitReg
+			pop rsi
+			pop rdi
+		jmp BSP_write_leaf_nodes_exit
+		BSP_write_leaf_nodes_not_leaf:
+			push rdi
+			push rsi
+			mov rdi, [rdi + BSP_NODE_LCHILD_OFF]
+			call BSP_write_leaf_nodes
+			
+			pop rsi
+			pop rdi
+			mov rdi, [rdi + BSP_NODE_RCHILD_OFF]
+			call BSP_write_leaf_nodes
+	BSP_write_leaf_nodes_exit:
 	mov rsp,rbp
 	pop rbp
 	ret
