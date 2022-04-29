@@ -1,5 +1,6 @@
 ; requires alloc.asm and random_generator.asm to be imported as well
 ; pretty printing functionality requires some form of printf to be imported	
+; leaf flattening relys on writer.asm
 
 section .data
 	BSP_pretty_print_str db "BSP_NODE{ x:%d, y:%d, w:%d, h:%d }",10,0
@@ -302,4 +303,87 @@ BSP_print_leaf_nodes:
 	BSP_print_leaf_nodes_exit:
 	mov rsp,rbp
 	pop rbp
+	ret
+
+; BSP_NODE* flatten_leaf_nodes(BSP_NODE* root)
+; should return an array of BSP_NODE* containing only the leaf nodes in rax
+; should also return the number of nodes in rdx
+BSP_flatten_leaf_nodes:
+	push rbp
+	mov rbp,rsp			
+		push rdi ; push root, it will be needed later
+
+		call BSP_count_leaf_nodes
+		push rax	; push count (it will be needed multiple times later)
+		
+		mov rdi, 8
+		mov rsi, rax
+		call basically_calloc	; calloc count items of size 8
+
+		mov rdi, rax
+		call WRITER_create_writer ; create a writer to the space calloc returned
+
+		pop rbx	; using rbx as a temp to hold the count so that I can shuffle the root node pointer off of the stack
+		pop rdi
+		push rbx
+
+		mov rsi, rax	; move the writer into the second argument of write_leaf_nodes
+		push rsi		; save the location of the writer
+
+		call BSP_write_leaf_nodes
+		
+		pop rdi	; pop location of writer into rdi
+		call WRITER_dissolve_writer	; disolve the writer, leaving a pointer to its array in rax
+
+		pop rdx	; pop the count into rdx
+
+		; rax should now hold an array of BSP_NODE*
+		; rdx should now hold the number of them
+	mov rsp,rbp
+	pop rbp
+	ret
+
+; void write_leaf_nodes(BSP_NODE* root, WRITER* writer)
+; writes all leaf nodes of a BSP rooted at root into an array controlled by writer
+; should not be called directly in most cases
+BSP_write_leaf_nodes:
+	push rbp
+	mov rbp,rsp
+		;TODO write this recursive function	
+	
+	mov rsp,rbp
+	pop rbp
+	ret
+
+; i64 count_leaf_nodes(BSP_NODE* root)
+; should return the number of leaf nodes which exist within a tree rooted at the node passed in
+BSP_count_leaf_nodes:
+	push rcx
+	push rbp
+	mov rbp, rsp
+		xor rcx,rcx
+		
+		cmp rdi, 0
+		je BSP_count_leaf_nodes_exit
+
+		mov eax, DWORD [rdi + BSP_NODE_LCHILD_OFF]
+		cmp eax, 0
+		jne BSP_count_leaf_nodes_not_leaf
+			inc rcx	; add one because this node is a leaf
+		jmp BSP_count_leaf_nodes_exit
+		BSP_count_leaf_nodes_not_leaf:
+			push rdi
+			mov rdi, [rdi + BSP_NODE_LCHILD_OFF]
+			call BSP_count_leaf_nodes
+			add rcx, rax	; add return of left child to this nodes counter
+			
+			pop rdi
+			mov rdi, [rdi + BSP_NODE_RCHILD_OFF]
+			call BSP_count_leaf_nodes
+			add rcx, rax	; add return of right child to this nodes counter
+	BSP_count_leaf_nodes_exit:
+	mov rax, rcx
+	mov rsp,rbp
+	pop rbp
+	pop rcx
 	ret
