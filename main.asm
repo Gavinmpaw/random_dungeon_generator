@@ -28,7 +28,7 @@ _start:
 	;int3
 
 	mov rdi, rax
-	mov rsi, 50
+	mov rsi, 8000
 	push rdi
 	call BSP_split_to_area
 	pop rdi

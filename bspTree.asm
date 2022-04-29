@@ -3,6 +3,9 @@
 
 section .data
 	BSP_pretty_print_str db "BSP_NODE{ x:%d, y:%d, w:%d, h:%d }",10,0
+
+	BSP_MAX_HW_RATIO equ 3	
+
 	; node
 	; 2 x 8 byte pointers
 	; 4 x 4 byte integers (2 for x and y location, 2 for height and width)
@@ -78,13 +81,31 @@ BSP_split_node_random:
 		jle	BSP_split_node_split_over
 		cmp DWORD [rdi + BSP_NODE_W_OFF], 10
 		jle BSP_split_node_split_over
-
+	
 		push rdi
+
+		; if height*max ratio is less than width, split width
+		mov rcx, BSP_MAX_HW_RATIO
+		xor rax,rax
+		mov eax, DWORD [rdi + BSP_NODE_H_OFF]
+		imul rcx
+		cmp eax, DWORD [rdi + BSP_NODE_W_OFF]
+		jle BSP_split_node_random_X_split
+
+		; if width*max ratio is less than height, split height
+		mov rcx, BSP_MAX_HW_RATIO
+		xor rax,rax
+		mov eax, DWORD [rdi + BSP_NODE_W_OFF]
+		imul rcx
+		cmp eax, DWORD [rdi + BSP_NODE_H_OFF]
+		jle BSP_split_node_random_Y_split
+
 		call genrand
 
 		and rax, 0x1
 		cmp rax, 1
 		jne BSP_split_node_random_X_split
+		BSP_split_node_random_Y_split:
 			; split on Y (height)
 			call genrand
 			pop rdi
@@ -212,8 +233,8 @@ BSP_split_to_area:
 		xor ebx,ebx
 		mov eax, DWORD [rdi + BSP_NODE_W_OFF]
 		mov ebx, DWORD [rdi + BSP_NODE_H_OFF]
-		sub eax, DWORD [rdi + BSP_NODE_X_OFF]
-		sub ebx, DWORD [rdi + BSP_NODE_Y_OFF]
+		;sub eax, DWORD [rdi + BSP_NODE_X_OFF]
+		;sub ebx, DWORD [rdi + BSP_NODE_Y_OFF]
 		; rax and rbx should now contain the width and height of the node	
 		imul rbx
 		; rax should now contain the area of the node (ignoring rdx because I doubt the output was too big for rax)
