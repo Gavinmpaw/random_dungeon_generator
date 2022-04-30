@@ -1,6 +1,6 @@
 ; requires alloc.asm and random_generator.asm to be imported as well
 ; pretty printing functionality requires some form of printf to be imported	
-; leaf flattening relys on writer.asm
+; leaf flattening relies on writer.asm
 
 section .data
 	BSP_pretty_print_str db "BSP_NODE{ x:%d, y:%d, w:%d, h:%d }",10,0

@@ -2,6 +2,7 @@
 %include "alloc.asm"
 %include "bspTree.asm"
 %include "writer.asm"
+%include "room_map.asm"
 %include "../Assembly-Playground/basically_stdio.asm"
 
 section .text
@@ -18,41 +19,14 @@ _start:
 	mov rdi, QWORD [rsp]
 	add rsp, 8
 
-	call sgenrand
+	;call sgenrand
 
-	xor rdi,rdi
-	xor rsi,rsi
-	mov rdx,500
-	mov rcx,500
-	call BSP_create_node_with_values
+	mov rdi, 150
+	mov rsi, 150
+	call ROOMMAP_create_map
 
 	mov rdi, rax
-	mov rsi, 8000
-	push rdi
-	call BSP_split_to_area
-	pop rdi
-	
-	push rdi
-	call BSP_print_leaf_nodes
-	
-	call print_nl
-
-	pop rdi
-	call BSP_flatten_leaf_nodes
-	mov r15, rax
-	mov r14, rdx
-
-	xor rcx,rcx
-	print_lp:
-		push rcx
-			mov rdi, QWORD [r15 + rcx*8]
-			call BSP_print_leaf_nodes
-		pop rcx
-	inc rcx
-	cmp rcx, r14
-	jle print_lp
-	
-	
+	call ROOMMAP_print_map
 
 	mov rax, 60
 	mov rdi, 0
