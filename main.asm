@@ -24,8 +24,13 @@ _start:
 	mov rdi, 150
 	mov rsi, 150
 	call ROOMMAP_create_map
+	
+	mov rdi,rax
+	push rdi
+	mov rsi, 500
+	call ROOMMAP_generate_rooms
 
-	mov rdi, rax
+	pop rdi
 	call ROOMMAP_print_map
 
 	mov rax, 60

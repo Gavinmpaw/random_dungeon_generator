@@ -131,3 +131,76 @@ ROOMMAP_print_map:
 	mov rsp, rbp
 	pop rbp
 	ret
+
+; void generate_rooms(ROOMMAP* room_map, int target_area);
+ROOMMAP_generate_rooms:
+	push rbp
+	mov rbp, rsp
+		push rdi
+		push rsi
+
+		mov esi, 0
+		mov edx, DWORD [rdi + ROOM_MAP_W_OFF]
+		mov ecx, DWORD [rdi + ROOM_MAP_H_OFF]
+		mov edi, 0
+		call BSP_create_node_with_values
+				
+		pop rsi
+		pop rdi
+
+		mov QWORD [rdi + ROOM_MAP_BSPTREE_OFF], rax	; save newly created BSP Tree root node to the map structure
+
+		push rdi
+		push rsi
+
+		; rsi is already correct for the next call
+		mov rdi, rax
+		push rdi
+		call BSP_split_to_area
+
+		pop rdi
+		call BSP_flatten_leaf_nodes
+		
+		pop rsi	; restore original parameter values
+		pop rdi
+
+		mov QWORD [rdi + ROOM_MAP_BSPARRY_OFF], rax	; saving the flattened BSP array of leaf nodes
+		mov DWORD [rdi + ROOM_MAP_ROOMCNT_OFF], edx	; saving the number of partitions in said array
+
+		xor rcx,rcx
+		
+		generate_room_partition_check_loop:
+			push rcx
+			push rdx
+			push rdi
+			
+				int3
+	
+				xor rax,rax
+				mov eax, DWORD [rdi + ROOM_MAP_W_OFF]
+				mov rdx, QWORD [rdi + ROOM_MAP_BSPARRY_OFF]
+				lea rdx, [rdx + rcx*8]
+				
+				xor r8,r8
+				xor r9,r9
+				mov r8d, DWORD [rdx + BSP_NODE_X_OFF]
+				mov r9d, DWORD [rdx + BSP_NODE_Y_OFF]
+
+				imul r9
+				add rax, r8
+
+				mov rdi, QWORD [rdi + ROOM_MAP_MAPMTRX_OFF]
+				add rdi, rax
+				mov al, BYTE [ROOMMAP_BLANKING_CHAR]
+				mov BYTE [rdi], al			 	
+
+			pop rdi
+			pop rdx
+			pop rcx
+		inc rcx
+		cmp rcx, rdx
+		jle generate_room_partition_check_loop
+			
+	mov rsp, rbp
+	pop rbp
+	ret
