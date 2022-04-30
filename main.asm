@@ -21,13 +21,13 @@ _start:
 
 	;call sgenrand
 
-	mov rdi, 150
-	mov rsi, 150
+	mov rdi, 75
+	mov rsi, 75
 	call ROOMMAP_create_map
 	
 	mov rdi,rax
 	push rdi
-	mov rsi, 500
+	mov rsi, 800
 	call ROOMMAP_generate_rooms
 
 	pop rdi

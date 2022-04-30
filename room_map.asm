@@ -173,13 +173,11 @@ ROOMMAP_generate_rooms:
 			push rcx
 			push rdx
 			push rdi
-			
-				int3
 	
 				xor rax,rax
 				mov eax, DWORD [rdi + ROOM_MAP_W_OFF]
 				mov rdx, QWORD [rdi + ROOM_MAP_BSPARRY_OFF]
-				lea rdx, [rdx + rcx*8]
+				mov rdx, QWORD [rdx + rcx*8]
 				
 				xor r8,r8
 				xor r9,r9
@@ -199,7 +197,7 @@ ROOMMAP_generate_rooms:
 			pop rcx
 		inc rcx
 		cmp rcx, rdx
-		jle generate_room_partition_check_loop
+		jl generate_room_partition_check_loop
 			
 	mov rsp, rbp
 	pop rbp
