@@ -19,7 +19,7 @@ _start:
 	mov rdi, QWORD [rsp]
 	add rsp, 8
 
-	;call sgenrand
+	call sgenrand
 
 	mov rdi, 75
 	mov rsi, 75
@@ -27,7 +27,7 @@ _start:
 	
 	mov rdi,rax
 	push rdi
-	mov rsi, 800
+	mov rsi, 750
 	call ROOMMAP_generate_rooms
 
 	pop rdi

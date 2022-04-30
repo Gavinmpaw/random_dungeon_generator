@@ -6,6 +6,8 @@ section .data
 	BSP_pretty_print_str db "BSP_NODE{ x:%d, y:%d, w:%d, h:%d }",10,0
 
 	BSP_MAX_HW_RATIO equ 3	
+	BSP_SPLIT_RANGE equ 4
+	BSP_HW_MIN equ 5
 
 	; node
 	; 2 x 8 byte pointers
@@ -77,10 +79,10 @@ BSP_split_node_random:
 	push rbp
 	mov rbp, rsp
 
-		; refuse to split if height or width are less than 10
-		cmp DWORD [rdi + BSP_NODE_H_OFF], 10
+		; refuse to split if height or width are less than 5
+		cmp DWORD [rdi + BSP_NODE_H_OFF], BSP_HW_MIN
 		jle	BSP_split_node_split_over
-		cmp DWORD [rdi + BSP_NODE_W_OFF], 10
+		cmp DWORD [rdi + BSP_NODE_W_OFF], BSP_HW_MIN
 		jle BSP_split_node_split_over
 	
 		push rdi
@@ -112,7 +114,7 @@ BSP_split_node_random:
 			pop rdi
 			push rax
 		
-			mov rbx, 4
+			mov rbx, BSP_SPLIT_RANGE
 			xor rax, rax
 			mov eax, DWORD [rdi + BSP_NODE_H_OFF]
 			cqo
@@ -168,7 +170,7 @@ BSP_split_node_random:
 			pop rdi
 			push rax
 		
-			mov rbx, 4
+			mov rbx, BSP_SPLIT_RANGE
 			xor rax,rax
 			mov eax, DWORD [rdi + BSP_NODE_W_OFF]
 			cqo
