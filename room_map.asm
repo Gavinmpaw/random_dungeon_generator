@@ -204,7 +204,9 @@ ROOMMAP_generate_rooms:
 		call ROOMMAP_populate_room_array
 		pop rdi
 
-		int3
+		push rdi
+		call ROOMMAP_draw_room_array
+		pop rdi	
 
 	mov rsp, rbp
 	pop rbp
@@ -248,5 +250,72 @@ ROOMMAP_populate_room_array:
 		jl ROOMMAP_populate_room_array_lp
 		
 	mov rsp,rbp
+	pop rbp
+	ret
+
+; void draw_room_array(ROOMMAP* room_map)
+; meant as a subroutine of generate_rooms, assmes all structures exist already and room array has been populated
+ROOMMAP_draw_room_array:
+	push rbp
+	mov rbp, rsp
+		; for each room
+		; need width and height of room, width of overall map/matrix, and upper left corner of room position in array
+
+		int3
+
+		xor rcx,rcx
+		ROOMMAP_draw_room_array_lp:
+			push rcx
+			push rdi			
+
+			mov rax, ROOM_DATA_SZ
+			imul rcx
+			add rax, [rdi+ROOM_MAP_ROOMARY_OFF]	; rax should now hold the location of a single room array element (4 integers representing the ul and lr corners of a room)
+			mov rsi, rax						; moved to rsi to free rax for math operations
+			
+			xor rax,rax
+			xor rdx,rdx
+			mov eax, DWORD [rsi + ROOM_DATA_Y1_OFF] ; Y value of ul corner of room
+			mov edx, DWORD [rdi + ROOM_MAP_W_OFF]	; width of map
+			imul rdx								; eax now contains offset to start of correct row
+			add edx, DWORD [rsi + ROOM_DATA_X1_OFF] ; adding the X value of the ul corner brings edx/rdx to the correct offset for the ul corner
+
+			xor rax,rax
+			mov eax, DWORD [rsi + ROOM_DATA_Y2_OFF]
+			sub eax, DWORD [rsi + ROOM_DATA_Y1_OFF]	; eax contains overall height of room (number of rows to draw)
+			
+			xor rcx,rcx
+			ROOMMAP_draw_room_array_lp2:
+				push rcx
+				push rax
+
+					xor rax,rax
+					mov eax, DWORD [rsi + ROOM_DATA_X2_OFF]
+					sub eax, DWORD [rsi + ROOM_DATA_X1_OFF]	; eax contains width of room
+
+					push rdi
+					mov rdi, [rdi + ROOM_MAP_MAPMTRX_OFF]	; start of map matrix
+					add rdi, rdx							; offset to start writing from
+					mov rcx, rax							; width of room as counter
+					xor rax,rax
+					mov al, BYTE [ROOMMAP_BLANKING_CHAR]	; character to write
+					rep stosb
+					pop rdi
+						
+					add edx, DWORD [rdi + ROOM_MAP_W_OFF]	; effectively moves to next row start location
+				pop rax
+				pop rcx
+			inc ecx
+			cmp ecx, eax
+			jl ROOMMAP_draw_room_array_lp2
+
+	
+			pop rdi
+			pop rcx
+		inc ecx
+		cmp ecx, DWORD [rdi + ROOM_MAP_ROOMCNT_OFF]
+		jl ROOMMAP_draw_room_array_lp
+	
+	mov rsp, rbp
 	pop rbp
 	ret
