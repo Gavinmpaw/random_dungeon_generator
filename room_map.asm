@@ -261,8 +261,6 @@ ROOMMAP_draw_room_array:
 		; for each room
 		; need width and height of room, width of overall map/matrix, and upper left corner of room position in array
 
-		int3
-
 		xor rcx,rcx
 		ROOMMAP_draw_room_array_lp:
 			push rcx
@@ -278,6 +276,7 @@ ROOMMAP_draw_room_array:
 			mov eax, DWORD [rsi + ROOM_DATA_Y1_OFF] ; Y value of ul corner of room
 			mov edx, DWORD [rdi + ROOM_MAP_W_OFF]	; width of map
 			imul rdx								; eax now contains offset to start of correct row
+			mov rdx,rax
 			add edx, DWORD [rsi + ROOM_DATA_X1_OFF] ; adding the X value of the ul corner brings edx/rdx to the correct offset for the ul corner
 
 			xor rax,rax
