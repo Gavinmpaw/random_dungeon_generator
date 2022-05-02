@@ -227,16 +227,21 @@ ROOMMAP_populate_room_array:
 			mov rax, 8	; this one is an array of pointers, and not directly an array of structs... so 8 bytes is the correct size here
 			imul rcx
 			add rax, [rdi+ROOM_MAP_BSPARRY_OFF]	; rax should now hold the location of a single BSP_NODE structure representing one of the partitions
-			pop rdx								; rdx should now hold the location of a single room array element
-			mov rax, [rax]
+			mov rax, [rax]						; dereferencing rax, because it was a pointer to a pointer to the struct instead of a pointer to the struct itself
+			pop rdx								; rdx should now hold the location of a single room array element	
 			push rcx
-			
+		
+			; these next two blocks set the corners of each room such that each section contains a 5x5 room	
 			mov ecx, DWORD [rax + BSP_NODE_X_OFF]
 			mov DWORD [rdx + ROOM_DATA_X1_OFF], ecx
+			add ecx, 5
+			mov DWORD [rdx + ROOM_DATA_X2_OFF], ecx
 			
 			mov ecx, DWORD [rax + BSP_NODE_Y_OFF]
 			mov DWORD [rdx + ROOM_DATA_Y1_OFF], ecx
-
+			add ecx, 5
+			mov DWORD [rdx + ROOM_DATA_Y2_OFF], ecx
+		
 			pop rcx
 		inc ecx
 		cmp ecx, DWORD [rdi + ROOM_MAP_ROOMCNT_OFF]
