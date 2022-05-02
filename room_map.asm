@@ -200,9 +200,48 @@ ROOMMAP_generate_rooms:
 
 		mov QWORD [rdi + ROOM_MAP_ROOMMTX_OFF], rax
 
+		push rdi
+		call ROOMMAP_populate_room_array
+		pop rdi
+
 		int3
-		
 
 	mov rsp, rbp
+	pop rbp
+	ret
+
+; void populate_room_array(ROOMMAP* room_map)
+; meant as a subroutine of generate_rooms, assumes all structures exist already and that the count is set
+ROOMMAP_populate_room_array:
+	push rbp
+	mov rbp,rsp
+		
+		xor rcx,rcx
+		ROOMMAP_populate_room_array_lp:
+
+			mov rax, ROOM_DATA_SZ
+			imul rcx
+			add rax, [rdi+ROOM_MAP_ROOMARY_OFF]	; rax should now hold the location of a single room array element (4 integers representing the ul and lr corners of a room)
+			push rax							; rax pushed but will be popped into rdx later
+
+			mov rax, 8	; this one is an array of pointers, and not directly an array of structs... so 8 bytes is the correct size here
+			imul rcx
+			add rax, [rdi+ROOM_MAP_BSPARRY_OFF]	; rax should now hold the location of a single BSP_NODE structure representing one of the partitions
+			pop rdx								; rdx should now hold the location of a single room array element
+			mov rax, [rax]
+			push rcx
+			
+			mov ecx, DWORD [rax + BSP_NODE_X_OFF]
+			mov DWORD [rdx + ROOM_DATA_X1_OFF], ecx
+			
+			mov ecx, DWORD [rax + BSP_NODE_Y_OFF]
+			mov DWORD [rdx + ROOM_DATA_Y1_OFF], ecx
+
+			pop rcx
+		inc ecx
+		cmp ecx, DWORD [rdi + ROOM_MAP_ROOMCNT_OFF]
+		jl ROOMMAP_populate_room_array_lp
+		
+	mov rsp,rbp
 	pop rbp
 	ret
