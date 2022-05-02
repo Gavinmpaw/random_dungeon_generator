@@ -166,39 +166,43 @@ ROOMMAP_generate_rooms:
 
 		mov QWORD [rdi + ROOM_MAP_BSPARRY_OFF], rax	; saving the flattened BSP array of leaf nodes
 		mov DWORD [rdi + ROOM_MAP_ROOMCNT_OFF], edx	; saving the number of partitions in said array
-
-		xor rcx,rcx
-		
-		generate_room_partition_check_loop:
-			push rcx
-			push rdx
-			push rdi
 	
-				xor rax,rax
-				mov eax, DWORD [rdi + ROOM_MAP_W_OFF]
-				mov rdx, QWORD [rdi + ROOM_MAP_BSPARRY_OFF]
-				mov rdx, QWORD [rdx + rcx*8]
-				
-				xor r8,r8
-				xor r9,r9
-				mov r8d, DWORD [rdx + BSP_NODE_X_OFF]
-				mov r9d, DWORD [rdx + BSP_NODE_Y_OFF]
+		push rdi
 
-				imul r9
-				add rax, r8
+		xor rsi,rsi
+		mov rdi, ROOM_DATA_SZ
+		mov esi, edx
+		call basically_calloc
 
-				mov rdi, QWORD [rdi + ROOM_MAP_MAPMTRX_OFF]
-				add rdi, rax
-				mov al, BYTE [ROOMMAP_BLANKING_CHAR]
-				mov BYTE [rdi], al			 	
+		pop rdi
 
-			pop rdi
-			pop rdx
-			pop rcx
-		inc rcx
-		cmp rcx, rdx
-		jl generate_room_partition_check_loop
-			
+		mov QWORD [rdi + ROOM_MAP_ROOMARY_OFF], rax	; saving newly allocated space for array of room data all initialized to zero
+		
+		xor rax,rax
+		xor rdx,rdx
+		mov eax, DWORD [rdi + ROOM_MAP_ROOMCNT_OFF]
+		mov edx, eax
+		imul rdx
+
+		push rdi
+		push rax
+
+		mov rdi, rax
+		call basically_malloc
+
+		mov rdi, rax
+		pop rcx
+		xor rax,rax
+		push rdi
+		rep stosb
+		pop rax
+		pop rdi
+
+		mov QWORD [rdi + ROOM_MAP_ROOMMTX_OFF], rax
+
+		int3
+		
+
 	mov rsp, rbp
 	pop rbp
 	ret
