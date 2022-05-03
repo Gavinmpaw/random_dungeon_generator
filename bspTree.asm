@@ -5,9 +5,9 @@
 section .data
 	BSP_pretty_print_str db "BSP_NODE{ x:%d, y:%d, w:%d, h:%d }",10,0
 
-	BSP_MAX_HW_RATIO equ 3	
+	BSP_MAX_HW_RATIO equ 4	
 	BSP_SPLIT_RANGE equ 4
-	BSP_HW_MIN equ 5
+	BSP_HW_MIN equ 10 
 
 	; node
 	; 2 x 8 byte pointers

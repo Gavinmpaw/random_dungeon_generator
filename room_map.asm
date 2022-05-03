@@ -1,6 +1,8 @@
 
 section .data
 		
+	ROOMMAP_MINIMUM_ROOM_WH equ 5
+
 	ROOMMAP_BLANKING_CHAR db ' '
 	ROOMMAP_WALLFILL_CHAR db '#'
 	ROOMMAP_NL_CHAR db 10
@@ -235,14 +237,98 @@ ROOMMAP_populate_room_array:
 		
 			; these next two blocks set the corners of each room such that each section contains a 5x5 room	
 			mov ecx, DWORD [rax + BSP_NODE_X_OFF]
-			mov DWORD [rdx + ROOM_DATA_X1_OFF], ecx
-			add ecx, 5
-			mov DWORD [rdx + ROOM_DATA_X2_OFF], ecx
+
+			; random ul corner X position within half of section
+			push rax
+			push rcx
+			push rdx
+			mov ecx, DWORD [rax + BSP_NODE_W_OFF]
+			shr ecx, 1
+			xor rax,rax
+			push rcx
+			call genrand
+			pop rcx
+			cqo
+			idiv rcx
+			mov rax,rdx
+			pop rdx
+			pop rcx
 			
+			add ecx, eax
+			mov DWORD [rdx + ROOM_DATA_X1_OFF], ecx
+
+			pop rax
+
+			; random width
+			push rax
+			push rcx
+			push rdx
+			mov ecx, DWORD [rax + BSP_NODE_W_OFF]
+			shr ecx, 1
+			xor rax,rax
+			push rcx
+			call genrand
+			pop rcx
+			cqo
+			idiv rcx
+			mov rax,rdx
+			pop rdx
+			pop rcx
+
+			cmp eax, ROOMMAP_MINIMUM_ROOM_WH
+			jge ROOMMAP_populate_rooms_over_min_w
+				add eax, ROOMMAP_MINIMUM_ROOM_WH
+			ROOMMAP_populate_rooms_over_min_w:
+			add ecx, eax
+			mov DWORD [rdx + ROOM_DATA_X2_OFF], ecx
+
+			pop rax
+			
+	
 			mov ecx, DWORD [rax + BSP_NODE_Y_OFF]
+		
+			; random ul corner Y position within half of section	
+			push rax
+			push rcx
+			push rdx
+			mov ecx, DWORD [rax + BSP_NODE_H_OFF]
+			shr ecx, 1
+			xor rax,rax
+			call genrand
+			cqo
+			idiv rcx
+			mov rax,rdx
+			pop rdx
+			pop rcx
+
 			mov DWORD [rdx + ROOM_DATA_Y1_OFF], ecx
-			add ecx, 5
+
+			pop rax
+
+			; random height
+			push rax
+			push rcx
+			push rdx
+			mov ecx, DWORD [rax + BSP_NODE_H_OFF]
+			shr ecx, 1
+			xor rax,rax
+			push rcx
+			call genrand
+			pop rcx
+			cqo
+			idiv rcx
+			mov rax,rdx
+			pop rdx
+			pop rcx
+
+			cmp eax, ROOMMAP_MINIMUM_ROOM_WH
+			jge ROOMMAP_populate_rooms_over_min_h
+				add eax, ROOMMAP_MINIMUM_ROOM_WH
+			ROOMMAP_populate_rooms_over_min_h:
+			add ecx, eax
 			mov DWORD [rdx + ROOM_DATA_Y2_OFF], ecx
+
+			pop rax
 		
 			pop rcx
 		inc ecx
